@@ -1,15 +1,10 @@
 import random
 import numpy as np
-from collections import deque
 from game import SnakeGameAI, Direction, Point
 from helper import plot
 
-# cantidad maxima de items que se almacenaran en el deque
-MAX_MEMORY = 100_000
-# cantidad de lote
-BATCH_SIZE = 1000
 # learning rate 
-LR = 0.001
+LR = 0.01
 
 class Agent:
 
@@ -17,9 +12,7 @@ class Agent:
         self.n_games = 0
         self.epsilon = 1.0 # randomness
         self.epsilon_discount = 0.9992
-
-        self.gamma = 0.9 # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY) # popleft()
+        self.gamma = 0.95 # discount rate
         self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
 
     def get_state(self, game):
@@ -75,14 +68,17 @@ class Agent:
         #self.epsilon = 40 - self.n_games
         final_move = [0,0,0]
         # exploration
-        if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
+        if random.random() < self.epsilon:
+            move = random.randint(0,2)
             final_move[move] = 1
+        #if random.randint(0, 200) < self.epsilon:
+         #   move = random.randint(0, 2)
+          #  final_move[move] = 1
         # exploitation
         else:
             move = np.argmax(self.table[state])
             final_move[move] = 1
-
+        self.epsilon = max(self.epsilon * self.epsilon_discount, 0.001)
         return final_move
 
 
@@ -96,7 +92,7 @@ def train():
     while True:
         # get old state
         state_old = agent.get_state(game)
-        print(state_old)
+        #print(state_old)
         # get move
         final_move = agent.get_action(state_old)
         
@@ -106,7 +102,6 @@ def train():
 
         # Bellman Equation Update
         agent.table[state_old][final_move] = (1 - LR) * agent.table[state_old][final_move] + LR * (reward + agent.gamma * max(agent.table[state_new]))
-        agent.epsilon = max(agent.epsilon*agent.epsilon_discount,0.001)
         if done:
             # train long memory, plot result
             game.reset()
