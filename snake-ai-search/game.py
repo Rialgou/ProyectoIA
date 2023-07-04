@@ -61,6 +61,22 @@ class SnakeGameAI:
         self.food = Point(x, y)
         if self.food in self.snake:
             self._place_food()
+    def shortest_path_to_food(self):
+    # Implementa el algoritmo A* para encontrar la ruta más corta
+    # desde la cabeza de la serpiente hasta la comida.
+    # Retorna la lista de direcciones que representan la ruta.
+    # Si no se encuentra ninguna ruta, retorna None.
+    # Tu código aquí
+        pass
+
+    def longest_path_to_tail(self):
+    # Implementa el algoritmo A* para encontrar la ruta más larga
+    # desde la cabeza de la serpiente hasta su cola.
+    # Retorna la lista de direcciones que representan la ruta.
+    # Si no se encuentra ninguna ruta, retorna None.
+    # Tu código aquí
+        pass
+
 
     # flujo de juego
     def play_step(self, action):

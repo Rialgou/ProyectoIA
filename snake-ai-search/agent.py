@@ -9,16 +9,20 @@ LR = 0.1
 class Agent:
 
     def __init__(self):
+        #episodes a 1 si quieren un juego normal, si quieren ir viendo las variaciones 
+        #setean más
+
         self.episodes = 10000
         self.n_games = 0
-        self.epsilon = 0.98 # randomness
-        self.epsilon_discount = 0.97
+        #self.epsilon = 0.98 # randomness
+        #self.epsilon_discount = 0.97
         #0.97 early
         #0.997 late
-        self.gamma = 1.0 # discount rate
-        self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
+        #self.gamma = 1.0 # discount rate
+        #self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
         #self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
-
+    
+    #queda igual
     def get_state(self, game):
         head = game.snake[0]
         point_l = Point(head.x - 20, head.y)
@@ -65,20 +69,79 @@ class Agent:
 
         return tuple(state)
 
-    def get_action(self, state):
+    #aqui deberia ir la logica de la búsqueda según yo 
+    #al final se eligira la acción en base a las condiciones dadas
+    #aunque para el tema del greedy quizas estaria mejor editar un poco el flujo
+    #tener dos instancias del juego para poder hacer ese recorrido a la fruta antes de elegir la acción real
+    def greedy_search(self, state, game):
+        #chatGPTEADO XD
+        # Step 1: Compute the shortest path P1 from S1's head to the food
+        path_to_food = game.shortest_path_to_food()
+
+        if path_to_food:
+            # Step 2: Move a virtual snake S2 to eat the food along path P1
+            s_copy = game.snake.copy()
+            s_copy.move_path(path_to_food)
+
+            # Step 3: Compute the longest path P2 from S2's head to its tail
+            path_to_tail = s_copy.longest_path_to_tail()
+
+            if path_to_tail:
+                # Step 4: Compute the longest path P3 from S1's head to its tail
+                path_to_tail_original = game.longest_path_to_tail()
+
+                if path_to_tail_original:
+                    # Let D be the first direction in path P3
+                    direction = path_to_tail_original[0]
+                else:
+                    # Go to step 5: Let D be the direction that makes S1 the farthest from the food
+                    head = game.snake.head()
+                    max_dist = -1
+                    direction = game.snake.direc
+
+                    for adj in head.all_adj():
+                        if game.map.is_safe(adj):
+                            dist = Point.manhattan_dist(adj, game.map.food)
+                            if dist > max_dist:
+                                max_dist = dist
+                                direction = head.direc_to(adj)
+            else:
+                # Go to step 4: Let D be the first direction in path P1
+                direction = path_to_food[0]
+        else:
+            # Go to step 5: Let D be the direction that makes S1 the farthest from the food
+            head = game.snake.head()
+            max_dist = -1
+            direction = game.snake.direc
+
+            for adj in head.all_adj():
+                if game.map.is_safe(adj):
+                    dist = Point.manhattan_dist(adj, game.map.food)
+                    if dist > max_dist:
+                        max_dist = dist
+                        direction = head.direc_to(adj)
+
+        return direction
+    
+    def get_action(self, state, game):
+        final_move = [0, 0, 0]
+        direction = self.greedy_search(state, game)
+        final_move[direction] = 1
+
+        return final_move, direction
         #self.epsilon = 40 - self.n_games
-        final_move = [0,0,0]
-        index = 0
+        #final_move = [0,0,0]
+        #index = 0
         # exploration
-        if random.random() < self.epsilon:
+        #if random.random() < self.epsilon:
             #print("tome exploración")
-            index = random.randint(0,2)
-            final_move[index] = 1
+            #index = random.randint(0,2)
+            #final_move[index] = 1
             
         # exploitation
-        else:
+        #else:
            # print("tome explotación")
-            index = np.argmax(self.table[state])
+           # index = np.argmax(self.table[state])
 
             #print("argumento recibido: ", index)
             #print("valor",max(self.table[state]))
@@ -88,9 +151,9 @@ class Agent:
             #print("2 ",self.table[state][1] )
             #print("3 ",self.table[state][2] )
 
-            final_move[index] = 1
+            #final_move[index] = 1
 
-        return final_move,index
+        #return final_move,index
 
 def train():
     plot_scores = []
