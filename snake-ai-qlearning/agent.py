@@ -9,10 +9,10 @@ LR = 0.01
 class Agent:
 
     def __init__(self):
-        self.episodes = 10000
+        self.episodes = 100000
         self.n_games = 0
         self.epsilon = 0.98 # randomness
-        self.epsilon_discount = 0.997
+        self.epsilon_discount = 0.97
         self.gamma = 1.0 # discount rate
         self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
         #self.table[..., 2] = np.round(np.random.rand(*self.table[..., 2].shape))#inicializamos valores aleatorios en la tabla 
@@ -69,22 +69,22 @@ class Agent:
         index = 0
         # exploration
         if random.random() < self.epsilon:
-            print("tome exploración")
+            #print("tome exploración")
             index = random.randint(0,2)
             final_move[index] = 1
             
         # exploitation
         else:
-            print("tome explotación")
+           # print("tome explotación")
             index = np.argmax(self.table[state])
 
-            print("argumento recibido: ", index)
-            print("valor",max(self.table[state]))
-            print(self.table[state][index])
-            print(self.table[state])
-            print("1 ",self.table[state][0] )
-            print("2 ",self.table[state][1] )
-            print("3 ",self.table[state][2] )
+            #print("argumento recibido: ", index)
+           # print("valor",max(self.table[state]))
+            #print(self.table[state][index])
+            #print(self.table[state])
+            #print("1 ",self.table[state][0] )
+            #print("2 ",self.table[state][1] )
+            #print("3 ",self.table[state][2] )
 
             final_move[index] = 1
 
@@ -101,7 +101,7 @@ def train():
     while agent.n_games < agent.episodes:
         # get old state
         state_old = agent.get_state(game)
-        print("tabla antigua: ",agent.table[state_old])
+        #print("tabla antigua: ",agent.table[state_old])
         
         # obtenemos el movimiento y su indice
         final_move,idx = agent.get_action(state_old)
@@ -116,14 +116,14 @@ def train():
 
         # Bellman Equation Update
         # accedemos al indice de la acción utilizada
-        print("valor antiguo qtable", agent.table[state_old][idx])
+       # print("valor antiguo qtable", agent.table[state_old][idx])
         agent.table[state_old][idx] = (1 - LR)\
                     * agent.table[state_old][idx] + LR\
                     * (reward + agent.gamma * max(agent.table[state_new])) 
-        print("valor nuevo qtable", agent.table[state_old][idx])
-        print("demas valores", agent.table[state_old])
+        #print("valor nuevo qtable", agent.table[state_old][idx])
+       # print("demas valores", agent.table[state_old])
 
-        print(" ")
+        #print(" ")
 
         #agent.table[state_old][final_move[idx]] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][final_move[idx]]) 
         if done:
