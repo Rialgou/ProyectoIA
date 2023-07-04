@@ -24,7 +24,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0,0,0)
 
 BLOCK_SIZE = 20
-SPEED = 600
+SPEED = 60000000000000000000000
 
 class SnakeGameAI:
 
@@ -80,7 +80,7 @@ class SnakeGameAI:
         game_over = False
         if self.is_collision() or self.frame_iteration > 100*len(self.snake):
             game_over = True
-            reward = -10
+            reward = -100
             return reward, game_over, self.score
 
         # 4. place new food or just move
@@ -90,6 +90,8 @@ class SnakeGameAI:
             self._place_food()
         else:
             self.snake.pop()
+            #reward = -10
+
         
         # 5. update ui and clock
         self._update_ui()
@@ -128,18 +130,22 @@ class SnakeGameAI:
     def _move(self, action):
         # [straight, right, left]
         # sentido del reloj
+        print("accion recibida: ",action )
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
         # sigue derecho
         if np.array_equal(action, [1, 0, 0]):
+            print("seguimos derecho")
             new_dir = clock_wise[idx] # no change
         # avanza en sentido horario
         elif np.array_equal(action, [0, 1, 0]):
+            print("giramos a la derecha")
             next_idx = (idx + 1) % 4
             new_dir = clock_wise[next_idx] # right turn r -> d -> l -> u
         # avanza en sentido antihorario
         else: # [0, 0, 1]
-            next_idx = (idx - 1) % 4
+            print("giramos a la izquierda")
+            next_idx = (idx + 3) % 4
             new_dir = clock_wise[next_idx] # left turn r -> u -> l -> d
 
         self.direction = new_dir

@@ -9,11 +9,13 @@ LR = 0.01
 class Agent:
 
     def __init__(self):
+        self.episodes = 10000
         self.n_games = 0
-        self.epsilon = 1.0 # randomness
-        self.epsilon_discount = 0.9992
-        self.gamma = 0.95 # discount rate
+        self.epsilon = 0.98 # randomness
+        self.epsilon_discount = 0.997
+        self.gamma = 1.0 # discount rate
         self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
+        #self.table[..., 2] = np.round(np.random.rand(*self.table[..., 2].shape))#inicializamos valores aleatorios en la tabla 
 
     def get_state(self, game):
         head = game.snake[0]
@@ -29,58 +31,64 @@ class Agent:
 
         state = [
             # Danger straight
-            (dir_r and game.is_collision(point_r)) or 
-            (dir_l and game.is_collision(point_l)) or 
-            (dir_u and game.is_collision(point_u)) or 
-            (dir_d and game.is_collision(point_d)),
+            int((dir_r and game.is_collision(point_r))) or 
+            int((dir_l and game.is_collision(point_l))) or 
+            int((dir_u and game.is_collision(point_u))) or 
+            int((dir_d and game.is_collision(point_d))),
 
             # Danger right
-            (dir_u and game.is_collision(point_r)) or 
-            (dir_d and game.is_collision(point_l)) or 
-            (dir_l and game.is_collision(point_u)) or 
-            (dir_r and game.is_collision(point_d)),
+            int((dir_u and game.is_collision(point_r))) or 
+            int((dir_d and game.is_collision(point_l))) or 
+            int((dir_l and game.is_collision(point_u))) or 
+            int((dir_r and game.is_collision(point_d))),
 
             # Danger left
-            (dir_d and game.is_collision(point_r)) or 
-            (dir_u and game.is_collision(point_l)) or 
-            (dir_r and game.is_collision(point_u)) or 
-            (dir_l and game.is_collision(point_d)),
+            int((dir_d and game.is_collision(point_r))) or 
+            int((dir_u and game.is_collision(point_l))) or 
+            int((dir_r and game.is_collision(point_u))) or 
+            int((dir_l and game.is_collision(point_d))),
             
             # Move direction
-            dir_l,
-            dir_r,
-            dir_u,
-            dir_d,
+            int(dir_l),
+            int(dir_r),
+            int(dir_u),
+            int(dir_d),
             
             # Food location 
-            game.food.x < game.head.x,  # food left
-            game.food.x > game.head.x,  # food right
-            game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y  # food down
+            int(game.food.x < game.head.x),  # food left
+            int(game.food.x > game.head.x),  # food right
+            int(game.food.y < game.head.y),  # food up
+            int(game.food.y > game.head.y)  # food down
             ]
 
-        return tuple(map(int,state))
-
-
-        self.trainer.train_step(state, action, reward, next_state, done)
+        return tuple(state)
 
     def get_action(self, state):
         #self.epsilon = 40 - self.n_games
         final_move = [0,0,0]
+        index = 0
         # exploration
         if random.random() < self.epsilon:
-            move = random.randint(0,2)
-            final_move[move] = 1
-        #if random.randint(0, 200) < self.epsilon:
-         #   move = random.randint(0, 2)
-          #  final_move[move] = 1
+            print("tome exploración")
+            index = random.randint(0,2)
+            final_move[index] = 1
+            
         # exploitation
         else:
-            move = np.argmax(self.table[state])
-            final_move[move] = 1
-        self.epsilon = max(self.epsilon * self.epsilon_discount, 0.001)
-        return final_move
+            print("tome explotación")
+            index = np.argmax(self.table[state])
 
+            print("argumento recibido: ", index)
+            print("valor",max(self.table[state]))
+            print(self.table[state][index])
+            print(self.table[state])
+            print("1 ",self.table[state][0] )
+            print("2 ",self.table[state][1] )
+            print("3 ",self.table[state][2] )
+
+            final_move[index] = 1
+
+        return final_move,index
 
 def train():
     plot_scores = []
@@ -89,34 +97,54 @@ def train():
     record = 0
     agent = Agent()
     game = SnakeGameAI()
-    while True:
+    file = open('Learning.txt', 'a')
+    while agent.n_games < agent.episodes:
         # get old state
         state_old = agent.get_state(game)
-        #print(state_old)
-        # get move
-        final_move = agent.get_action(state_old)
+        print("tabla antigua: ",agent.table[state_old])
         
-        # perform move and get new state
+        # obtenemos el movimiento y su indice
+        final_move,idx = agent.get_action(state_old)
+       
+        # recibimos información del paso
         reward, done, score = game.play_step(final_move)
+    
+        # obtenemos la información del nuevo ciclo
         state_new = agent.get_state(game)
+    
+        
 
         # Bellman Equation Update
-        agent.table[state_old][final_move] = (1 - LR) * agent.table[state_old][final_move] + LR * (reward + agent.gamma * max(agent.table[state_new]))
+        # accedemos al indice de la acción utilizada
+        print("valor antiguo qtable", agent.table[state_old][idx])
+        agent.table[state_old][idx] = (1 - LR)\
+                    * agent.table[state_old][idx] + LR\
+                    * (reward + agent.gamma * max(agent.table[state_new])) 
+        print("valor nuevo qtable", agent.table[state_old][idx])
+        print("demas valores", agent.table[state_old])
+
+        print(" ")
+
+        #agent.table[state_old][final_move[idx]] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][final_move[idx]]) 
         if done:
             # train long memory, plot result
             game.reset()
+            agent.epsilon = max(agent.epsilon * agent.epsilon_discount, 0.01)
+            print(agent.epsilon)
             agent.n_games += 1
 
             if score > record:
                 record = score
 
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
+            file.write('Game {} Score {} Record: {}\n'.format(agent.n_games, score, record))
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
+    file.close()
+        
 
 
 if __name__ == '__main__':
