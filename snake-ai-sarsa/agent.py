@@ -9,13 +9,13 @@ LR = 0.1
 class Agent:
 
     def __init__(self):
-        self.episodes = 100000
+        self.episodes = 10000
         self.n_games = 0
         self.epsilon = 0.98 # randomness
         self.epsilon_discount = 0.97
         self.gamma = 1.0 # discount rate
-        #self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
-        self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
+        self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
+        #self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
     
     def get_state(self, game):
         head = game.snake[0]
@@ -75,11 +75,11 @@ class Agent:
             
         # exploitation
         else:
-           # print("tome explotación")
+            #print("tome explotación")
             index = np.argmax(self.table[state])
 
             #print("argumento recibido: ", index)
-           # print("valor",max(self.table[state]))
+            #print("valor",max(self.table[state]))
             #print(self.table[state][index])
             #print(self.table[state])
             #print("1 ",self.table[state][0] )
@@ -118,12 +118,12 @@ def train():
 
         # Bellman Equation Update
         # accedemos al indice de la acción utilizada
-       # print("valor antiguo qtable", agent.table[state_old][idx])
+        #print("valor antiguo qtable", agent.table[state_old][idx])
         agent.table[state_old][idx] = (1 - LR)\
                     * agent.table[state_old][idx] + LR\
                     * (reward + agent.gamma * agent.table[state_new][next_idx]) 
         #print("valor nuevo qtable", agent.table[state_old][idx])
-       # print("demas valores", agent.table[state_old])
+        #print("demas valores", agent.table[state_old])
 
         #print(" ")
 

@@ -130,21 +130,21 @@ class SnakeGameAI:
     def _move(self, action):
         # [straight, right, left]
         # sentido del reloj
-        print("accion recibida: ",action )
+        #print("accion recibida: ",action )
         clock_wise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
         idx = clock_wise.index(self.direction)
         # sigue derecho
         if np.array_equal(action, [1, 0, 0]):
-            print("seguimos derecho")
+            #print("seguimos derecho")
             new_dir = clock_wise[idx] # no change
         # avanza en sentido horario
         elif np.array_equal(action, [0, 1, 0]):
-            print("giramos a la derecha")
+            #print("giramos a la derecha")
             next_idx = (idx + 1) % 4
             new_dir = clock_wise[next_idx] # right turn r -> d -> l -> u
         # avanza en sentido antihorario
         else: # [0, 0, 1]
-            print("giramos a la izquierda")
+            #print("giramos a la izquierda")
             next_idx = (idx + 3) % 4
             new_dir = clock_wise[next_idx] # left turn r -> u -> l -> d
 

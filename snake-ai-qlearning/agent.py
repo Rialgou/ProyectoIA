@@ -9,13 +9,15 @@ LR = 0.1
 class Agent:
 
     def __init__(self):
-        self.episodes = 100000
+        self.episodes = 10000
         self.n_games = 0
         self.epsilon = 0.98 # randomness
         self.epsilon_discount = 0.97
+        #0.97 early
+        #0.997 late
         self.gamma = 1.0 # discount rate
         self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
-        #self.table[..., 2] = np.round(np.random.rand(*self.table[..., 2].shape))#inicializamos valores aleatorios en la tabla 
+        #self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
 
     def get_state(self, game):
         head = game.snake[0]
@@ -79,7 +81,7 @@ class Agent:
             index = np.argmax(self.table[state])
 
             #print("argumento recibido: ", index)
-           # print("valor",max(self.table[state]))
+            #print("valor",max(self.table[state]))
             #print(self.table[state][index])
             #print(self.table[state])
             #print("1 ",self.table[state][0] )
