@@ -14,9 +14,9 @@ class Agent:
         self.epsilon = 0.98 # randomness
         self.epsilon_discount = 0.97
         self.gamma = 1.0 # discount rate
-        self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
-        #self.table[..., 2] = np.round(np.random.rand(*self.table[..., 2].shape))#inicializamos valores aleatorios en la tabla 
-
+        #self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
+        self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
+    
     def get_state(self, game):
         head = game.snake[0]
         point_l = Point(head.x - 20, head.y)
@@ -112,14 +112,16 @@ def train():
         # obtenemos la información del nuevo ciclo
         state_new = agent.get_state(game)
     
-        
+        next_move,next_idx = agent.get_action(state_new)
+
+
 
         # Bellman Equation Update
         # accedemos al indice de la acción utilizada
        # print("valor antiguo qtable", agent.table[state_old][idx])
         agent.table[state_old][idx] = (1 - LR)\
                     * agent.table[state_old][idx] + LR\
-                    * (reward + agent.gamma * max(agent.table[state_new])) 
+                    * (reward + agent.gamma * agent.table[state_new][next_idx]) 
         #print("valor nuevo qtable", agent.table[state_old][idx])
        # print("demas valores", agent.table[state_old])
 
