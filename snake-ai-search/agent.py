@@ -1,6 +1,5 @@
 import random
 import heapq
-import numpy as np
 from game import SnakeGameAI, Direction, Point, BLOCK_SIZE
 from helper import plot
 
@@ -15,13 +14,6 @@ class Agent:
 
         self.episodes = 10000
         self.n_games = 0
-        #self.epsilon = 0.98 # randomness
-        #self.epsilon_discount = 0.97
-        #0.97 early
-        #0.997 late
-        #self.gamma = 1.0 # discount rate
-        #self.table = np.zeros((2,2,2,2,2,2,2,2,2,2,2,3))
-        #self.table = np.random.rand(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3) * 0.01
     
     #queda igual
     def get_state(self, game):
@@ -69,62 +61,8 @@ class Agent:
             ]
 
         return tuple(state)
-
-    #aqui deberia ir la logica de la búsqueda según yo 
-    #al final se eligira la acción en base a las condiciones dadas
-    #aunque para el tema del greedy quizas estaria mejor editar un poco el flujo
-    #tener dos instancias del juego para poder hacer ese recorrido a la fruta antes de elegir la acción real
-    def greedy_search(self, state, game):
-        #chatGPTEADO XD
-        # Step 1: Compute the shortest path P1 from S1's head to the food
-        path_to_food = game.shortest_path_to_food()
-
-        if path_to_food:
-            # Step 2: Move a virtual snake S2 to eat the food along path P1
-            s_copy = game.snake.copy()
-            s_copy.move_path(path_to_food)
-
-            # Step 3: Compute the longest path P2 from S2's head to its tail
-            path_to_tail = s_copy.longest_path_to_tail()
-
-            if path_to_tail:
-                # Step 4: Compute the longest path P3 from S1's head to its tail
-                path_to_tail_original = game.longest_path_to_tail()
-
-                if path_to_tail_original:
-                    # Let D be the first direction in path P3
-                    direction = path_to_tail_original[0]
-                else:
-                    # Go to step 5: Let D be the direction that makes S1 the farthest from the food
-                    head = game.snake.head()
-                    max_dist = -1
-                    direction = game.snake.direc
-
-                    for adj in head.all_adj():
-                        if game.map.is_safe(adj):
-                            dist = Point.manhattan_dist(adj, game.map.food)
-                            if dist > max_dist:
-                                max_dist = dist
-                                direction = head.direc_to(adj)
-            else:
-                # Go to step 4: Let D be the first direction in path P1
-                direction = path_to_food[0]
-        else:
-            # Go to step 5: Let D be the direction that makes S1 the farthest from the food
-            head = game.snake.head()
-            max_dist = -1
-            direction = game.snake.direc
-
-            for adj in head.all_adj():
-                if game.map.is_safe(adj):
-                    dist = Point.manhattan_dist(adj, game.map.food)
-                    if dist > max_dist:
-                        max_dist = dist
-                        direction = head.direc_to(adj)
-
-        return direction
-       #REVISAR
     
+       #REVISAR  
     def heuristic(self, p1, p2):
         return abs(p1.x - p2.x) + abs(p1.y - p2.y)
          #REVISAR
@@ -136,7 +74,6 @@ class Agent:
         open_list = []
         # Crea un diccionario para almacenar los nodos padres.
         parents = {}
-
         # Inicializa los costos g(x) del inicio como 0.
         g[start] = 0
         # Calcula la distancia heurística h(x) desde el inicio hasta el objetivo.
@@ -169,26 +106,20 @@ class Agent:
                     neighbor = (current[0], current[1] - BLOCK_SIZE)
                 elif direction == Direction.DOWN:
                     neighbor = (current[0], current[1] + BLOCK_SIZE)
-
                 # Calcula el nuevo costo g(x) del vecino.
                 new_g = g[current] + 1
-
                 # Si el vecino ya fue visitado con un costo menor, ignóralo.
                 if neighbor in g and new_g >= g[neighbor]:
                     continue
-
                 # Almacena el nuevo costo g(x) y el nodo padre del vecino.
                 g[neighbor] = new_g
                 parents[neighbor] = current
-
                 # Calcula la distancia heurística h(x) desde el vecino hasta el objetivo.
                 h = self.heuristic(Point(*neighbor), Point(*goal))
                 # Calcula el valor de f(x) para el vecino.
                 f = new_g + h
-
                 # Agrega el vecino a la cola de prioridad con prioridad f(x).
                 heapq.heappush(open_list, (f, neighbor))
-
         # Si no se encuentra ninguna ruta, retorna None.
         return None
       
@@ -209,8 +140,20 @@ class Agent:
         goal = (game.food.x, game.food.y)
         path = self.a_star_search(game, start, goal)
         if path:
-            return [game.head.direc_to(Point(*pos)) for pos in path]
+            next_pos = Point(*path[1])
+            direc = self.get_direction(game.head, next_pos)
+            return direc
         return None
+    
+    def get_direction(self, current, next_pos):
+        if next_pos.x > current.x:
+            return Direction.RIGHT
+        elif next_pos.x < current.x:
+            return Direction.LEFT
+        elif next_pos.y > current.y:
+            return Direction.DOWN
+        elif next_pos.y < current.y:
+            return Direction.UP
     
         #REVISAR
     def longest_path_to_tail(self, game):
@@ -219,8 +162,7 @@ class Agent:
         path = self.a_star_search(game, start, goal)
         if path:
             return [game.head.direc_to(Point(*pos)) for pos in path]
-        return None
-    
+        return None    
     
 def train():
     plot_scores = []
