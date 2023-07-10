@@ -1,7 +1,7 @@
 import random
 import heapq
 import numpy as np
-from game import SnakeGameAI, Direction, Point
+from game import SnakeGameAI, Direction, Point, BLOCK_SIZE
 from helper import plot
 
 # learning rate 
@@ -124,10 +124,12 @@ class Agent:
 
         return direction
        #REVISAR
+    
     def heuristic(self, p1, p2):
         return abs(p1.x - p2.x) + abs(p1.y - p2.y)
          #REVISAR
-    def a_star_search(game, start, goal):
+
+    def a_star_search(self, game, start, goal):
         # Crea un diccionario para almacenar los costos de movimiento g(x) desde el inicio hasta cada posición.
         g = {}
         # Crea una cola de prioridad para almacenar los nodos a explorar.
@@ -138,7 +140,7 @@ class Agent:
         # Inicializa los costos g(x) del inicio como 0.
         g[start] = 0
         # Calcula la distancia heurística h(x) desde el inicio hasta el objetivo.
-        h = Agent.heuristic(Point(*start), Point(*goal))
+        h = self.heuristic(Point(*start), Point(*goal))
         # Calcula el valor de f(x) para el inicio.
         f = g[start] + h
         # Agrega el inicio a la cola de prioridad con prioridad f(x).
@@ -160,13 +162,13 @@ class Agent:
             # Genera los vecinos del nodo actual.
             for direction in [Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN]:
                 if direction == Direction.RIGHT:
-                    neighbor = (current[0] + game.BLOCK_SIZE, current[1])
+                    neighbor = (current[0] + BLOCK_SIZE, current[1])
                 elif direction == Direction.LEFT:
-                    neighbor = (current[0] - game.BLOCK_SIZE, current[1])
+                    neighbor = (current[0] - BLOCK_SIZE, current[1])
                 elif direction == Direction.UP:
-                    neighbor = (current[0], current[1] - game.BLOCK_SIZE)
+                    neighbor = (current[0], current[1] - BLOCK_SIZE)
                 elif direction == Direction.DOWN:
-                    neighbor = (current[0], current[1] + game.BLOCK_SIZE)
+                    neighbor = (current[0], current[1] + BLOCK_SIZE)
 
                 # Calcula el nuevo costo g(x) del vecino.
                 new_g = g[current] + 1
@@ -180,7 +182,7 @@ class Agent:
                 parents[neighbor] = current
 
                 # Calcula la distancia heurística h(x) desde el vecino hasta el objetivo.
-                h = game.heuristic(Point(*neighbor), Point(*goal))
+                h = self.heuristic(Point(*neighbor), Point(*goal))
                 # Calcula el valor de f(x) para el vecino.
                 f = new_g + h
 
@@ -189,11 +191,10 @@ class Agent:
 
         # Si no se encuentra ninguna ruta, retorna None.
         return None
-    
-    
+      
     def get_action(self, state, game):
         final_move = [0, 0, 0]
-        path_to_food = self.shortest_path_to_food()
+        path_to_food = self.shortest_path_to_food(game)
         if path_to_food:
             direction = path_to_food[0]
         else:
@@ -201,45 +202,23 @@ class Agent:
         final_move[direction.value] = 1
 
         return final_move, direction
-        #self.epsilon = 40 - self.n_games
-        #final_move = [0,0,0]
-        #index = 0
-        # exploration
-        #if random.random() < self.epsilon:
-            #print("tome exploración")
-            #index = random.randint(0,2)
-            #final_move[index] = 1
-            
-        # exploitation
-        #else:
-           # print("tome explotación")
-           # index = np.argmax(self.table[state])
-
-            #print("argumento recibido: ", index)
-            #print("valor",max(self.table[state]))
-            #print(self.table[state][index])
-            #print(self.table[state])
-            #print("1 ",self.table[state][0] )
-            #print("2 ",self.table[state][1] )
-            #print("3 ",self.table[state][2] )
-
-            #final_move[index] = 1
 
         #REVISAR
-    def shortest_path_to_food(self):
-        start = (SnakeGameAI.head.x, SnakeGameAI.head.y)
-        goal = (SnakeGameAI.food.x, SnakeGameAI.food.y)
-        path = self.a_star_search(self, start, goal)
+    def shortest_path_to_food(self, game):
+        start = (game.head.x, game.head.y)
+        goal = (game.food.x, game.food.y)
+        path = self.a_star_search(game, start, goal)
         if path:
-            return [self.head.direc_to(Point(*pos)) for pos in path]
+            return [game.head.direc_to(Point(*pos)) for pos in path]
         return None
+    
         #REVISAR
-    def longest_path_to_tail(self):
-        start = (SnakeGameAI.head.x, SnakeGameAI.head.y)
-        goal = (SnakeGameAI.snake[-1].x, SnakeGameAI.snake[-1].y)
-        path = self.a_star_search(self, start, goal)
+    def longest_path_to_tail(self, game):
+        start = (game.head.x, game.head.y)
+        goal = (game.snake[-1].x, game.snake[-1].y)
+        path = self.a_star_search(game, start, goal)
         if path:
-            return [SnakeGameAI.head.direc_to(Point(*pos)) for pos in path]
+            return [game.head.direc_to(Point(*pos)) for pos in path]
         return None
     
     
