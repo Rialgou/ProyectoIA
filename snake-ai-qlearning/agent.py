@@ -127,7 +127,7 @@ def train():
 
         #print(" ")
 
-        #agent.table[state_old][final_move[idx]] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][final_move[idx]]) 
+        #agent.table[state_old][idx] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][idx]) 
         if done:
             # train long memory, plot result
             game.reset()

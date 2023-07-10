@@ -100,34 +100,36 @@ def train():
     file = open('Learning.txt', 'a')
     while agent.n_games < agent.episodes:
         # get old state
+        done = False
         state_old = agent.get_state(game)
         #print("tabla antigua: ",agent.table[state_old])
         
         # obtenemos el movimiento y su indice
         final_move,idx = agent.get_action(state_old)
-       
-        # recibimos información del paso
-        reward, done, score = game.play_step(final_move)
+        while not done:
+            # recibimos información del paso
+            reward, done, score = game.play_step(final_move)
     
-        # obtenemos la información del nuevo ciclo
-        state_new = agent.get_state(game)
+            # obtenemos la información del nuevo ciclo
+            state_new = agent.get_state(game)
     
-        next_move,next_idx = agent.get_action(state_new)
+            next_move,next_idx = agent.get_action(state_new)
 
-
-
-        # Bellman Equation Update
-        # accedemos al indice de la acción utilizada
-        #print("valor antiguo qtable", agent.table[state_old][idx])
-        agent.table[state_old][idx] = (1 - LR)\
+            # Bellman Equation Update
+            # accedemos al indice de la acción utilizada
+            #print("valor antiguo qtable", agent.table[state_old][idx])
+            agent.table[state_old][idx] = (1 - LR)\
                     * agent.table[state_old][idx] + LR\
                     * (reward + agent.gamma * agent.table[state_new][next_idx]) 
-        #print("valor nuevo qtable", agent.table[state_old][idx])
-        #print("demas valores", agent.table[state_old])
+            #print("valor nuevo qtable", agent.table[state_old][idx])
+            #print("demas valores", agent.table[state_old])
 
-        #print(" ")
-
-        #agent.table[state_old][final_move[idx]] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][final_move[idx]]) 
+            #print(" ")
+            # actualizamos valores
+            state_old = state_new
+            final_move = next_move
+            idx = next_idx
+            #agent.table[state_old][[idx] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][idx]) 
         if done:
             # train long memory, plot result
             game.reset()
