@@ -124,13 +124,13 @@ class Agent:
         return None
       
     def get_action(self, state, game):
-        final_move = [0, 0, 0]
-        path_to_food = self.shortest_path_to_food(game)
-        if path_to_food:
-            direction = path_to_food[0]
+        final_move = [0, 0, 0, 0]  # Actualizado a una lista de tamaño 4
+        direction = self.shortest_path_to_food(game)
+        if direction:
+            final_move[direction.value - 1] = 1  # Restamos 1 para ajustar el índice
         else:
             direction = random.choice([Direction.RIGHT, Direction.LEFT, Direction.UP, Direction.DOWN])
-        final_move[direction.value] = 1
+            final_move[direction.value - 1] = 1  # Restamos 1 para ajustar el índice
 
         return final_move, direction
 
@@ -187,25 +187,8 @@ def train():
         state_new = agent.get_state(game)
         final_move, idx = agent.get_action(state_new, game)
     
-        
-
-        # Bellman Equation Update
-        # accedemos al indice de la acción utilizada
-       # print("valor antiguo qtable", agent.table[state_old][idx])
-        agent.table[state_old][idx] = (1 - LR)\
-                    * agent.table[state_old][idx] + LR\
-                    * (reward + agent.gamma * max(agent.table[state_new])) 
-        #print("valor nuevo qtable", agent.table[state_old][idx])
-       # print("demas valores", agent.table[state_old])
-
-        #print(" ")
-
-        #agent.table[state_old][final_move[idx]] += LR * (reward + (agent.gamma * max(agent.table[state_new])) - agent.table[state_old][final_move[idx]]) 
         if done:
-            # train long memory, plot result
             game.reset()
-            agent.epsilon = max(agent.epsilon * agent.epsilon_discount, 0.01)
-            print(agent.epsilon)
             agent.n_games += 1
 
             if score > record:
