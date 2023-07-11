@@ -34,10 +34,10 @@ class Spot:
         self.camefrom = []
         self.obstrucle = False
 
-    def show(self, color):
+    def show(self, color): # crea las celdas
         draw.rect(screen, color, [self.x*hr+2, self.y*wr+2, hr-4, wr-4])
 
-    def add_neighbors(self):
+    def add_neighbors(self): # añade a los cercanos al head a lista neighbors
         if self.x > 0:
             self.neighbors.append(grid[self.x - 1][self.y])
         if self.y > 0:
@@ -48,7 +48,7 @@ class Spot:
             self.neighbors.append(grid[self.x][self.y + 1])
 
 
-def getpath(food1, snake1):
+def getpath(food1, snake1): # obtener camino a comida
     food1.camefrom = []
     for s in snake1:
         s.camefrom = []
@@ -70,8 +70,8 @@ def getpath(food1, snake1):
                 else:
                     neighbor.g = tempg
                     openset.append(neighbor)
-                neighbor.h = sqrt((neighbor.x - food1.x) ** 2 + (neighbor.y - food1.y) ** 2)  # heuristica distancia euclidiana entre head y food
-                neighbor.f = neighbor.g + neighbor.h  # funcion f
+                neighbor.h = abs(neighbor.x - food1.x) + (neighbor.y - food1.y) # heuristica
+                neighbor.f = neighbor.g + neighbor.h  # funcion f = acumulado + heuristica
                 neighbor.camefrom = current1
         if current1 == food1:
             break
@@ -167,7 +167,7 @@ def run_game():
                     direction = 1
 
 
-for _ in range(1000):  # Ejecutar el juego 100 veces
+for _ in range(100):  # Ejecutar el juego 100 veces
     print("Episodio: ", episode+1)
     run_game()
     score = 0
