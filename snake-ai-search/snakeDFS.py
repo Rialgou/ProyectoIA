@@ -100,7 +100,7 @@ def run_game():
 
     done = False
     while not done:
-        clock.tick(15)
+        clock.tick(10000000)
         screen.fill(BLACK)
         if(len(dir_array) == 0):
             max_score.append(score) 
@@ -152,20 +152,21 @@ def run_game():
                 elif event.key == K_d and not direction == 3:
                     direction = 1
 
-for _ in range(100):  # Ejecutar el juego 100 veces
+for _ in range(10):  # Ejecutar el juego 100 veces
     print("Episodio: ", episode+1)
     run_game()
     score = 0
     episode = episode + 1
 
-min_score = min(max_score)
-max_score = max(max_score)
-mean_score = (sum(max_score)/len(max_score))
+min = min(max_score)
+max = max(max_score)
 print("Puntajes:", max_score)
+mean_score = (sum(max_score)/len(max_score))
 print("Media: ", mean_score)
-print("Menor: ", min_score)
-print("Mayor: ", max_score)
+print("Menor: ", min)
+print("Mayor: ", max)
 plt.plot(range(1, len(max_score) + 1), max_score)
+plt.plot(mean_score)
 plt.xlabel("Juego")
 plt.ylabel("Puntaje")
 plt.title("Puntajes obtenidos en cada juego")
