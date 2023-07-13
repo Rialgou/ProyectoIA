@@ -11,6 +11,7 @@ BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 max_score = []
+actions_per_food = []
 episode = 0
 
 cols = 25
@@ -81,6 +82,7 @@ def getpath(food1, snake1): # obtener camino a comida
 
 def run_game():
     score = 0
+    actions = 0
     global grid, screen
     screen = display.set_mode([width, height])
     display.set_caption("Snake Game")
@@ -96,6 +98,7 @@ def run_game():
     food = grid[randint(0, rows-1)][randint(0, cols-1)]
     current = snake[-1]
     dir_array = getpath(food, snake)
+    actions = len(dir_array)
     food_array = [food]
 
     done = False
@@ -118,12 +121,14 @@ def run_game():
 
         if current.x == food.x and current.y == food.y:
             score = score + 1
+            actions_per_food.append(actions)
             while 1:
                 food = grid[randint(0, rows - 1)][randint(0, cols - 1)]
                 if not (food.obstrucle or food in snake):
                     break
             food_array.append(food)
             dir_array = getpath(food, snake)
+            actions = len(dir_array)
         else:
                 if(len(snake)> 1):
                     snake.pop(0)
@@ -152,12 +157,13 @@ def run_game():
                 elif event.key == K_d and not direction == 3:
                     direction = 1
 
-for _ in range(10):  # Ejecutar el juego 100 veces
+for _ in range(5):  # Ejecutar el juego 100 veces
     print("Episodio: ", episode+1)
     run_game()
     score = 0
     episode = episode + 1
 
+print("Acciones totales: ", sum(actions_per_food))
 min = min(max_score)
 max = max(max_score)
 print("Puntajes:", max_score)

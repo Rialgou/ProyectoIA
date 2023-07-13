@@ -35,10 +35,10 @@ class Spot:
         self.camefrom = []
         self.obstrucle = False
 
-    def show(self, color): # crea las celdas
+    def show(self, color):
         draw.rect(screen, color, [self.x*hr+2, self.y*wr+2, hr-4, wr-4])
 
-    def add_neighbors(self): # añade a los cercanos al head a lista neighbors
+    def add_neighbors(self):
         if self.x > 0:
             self.neighbors.append(grid[self.x - 1][self.y])
         if self.y > 0:
@@ -49,7 +49,7 @@ class Spot:
             self.neighbors.append(grid[self.x][self.y + 1])
 
 
-def getpath(food1, snake1): # obtener camino a comida
+def getpath(food1, snake1):
     food1.camefrom = []
     for s in snake1:
         s.camefrom = []
@@ -59,16 +59,21 @@ def getpath(food1, snake1): # obtener camino a comida
     while 1:
         if not openset:
             break
-        current1 = min(openset, key=lambda x: x.h)  # Selección basada en la heurística
+        current1 = min(openset, key=lambda x: x.f)
         openset = [openset[i] for i in range(len(openset)) if not openset[i] == current1]
         closedset.append(current1)
         for neighbor in current1.neighbors:
             if neighbor not in closedset and not neighbor.obstrucle and neighbor not in snake1:
-                neighbor.g = 0  # Eliminar el cálculo del costo acumulado
-                neighbor.h = abs(neighbor.x - food1.x) + abs(neighbor.y - food1.y) # heurística
-                neighbor.f = neighbor.g + neighbor.h  # función f = heurística
+                tempg = neighbor.g + 1
+                if neighbor in openset:
+                    if tempg < neighbor.g:
+                        neighbor.g = tempg
+                else:
+                    neighbor.g = tempg
+                    openset.append(neighbor)
+                neighbor.h = abs(neighbor.x - food1.x) + abs(neighbor.y - food1.y)  # heuristica
+                neighbor.f = neighbor.g + neighbor.h  # funcion f
                 neighbor.camefrom = current1
-                openset.append(neighbor)
         if current1 == food1:
             break
     while current1.camefrom:
@@ -113,7 +118,7 @@ def run_game():
 
     done = False
     while not done:
-        clock.tick(500)
+        clock.tick(60000)
         screen.fill(BLACK)
         if(len(dir_array) == 0):
             max_score.append(score) 
@@ -140,8 +145,8 @@ def run_game():
             dir_array = getpath(food, snake)
             actions = len(dir_array)
         else:
-            if(len(snake)> 1):
-                snake.pop(0)
+                if(len(snake)> 1):
+                    snake.pop(0)
 
         for spot in snake:
             spot.show(BLUE)
@@ -156,7 +161,6 @@ def run_game():
         for event in pygame.event.get():
             if event.type == QUIT:
                 done = True
-                quit()
             elif event.type == KEYDOWN:
                 if event.key == K_w and not direction == 0:
                     direction = 2
@@ -168,7 +172,7 @@ def run_game():
                     direction = 1
 
 
-for _ in range(5):  # Ejecutar el juego 100 veces
+for _ in range(5):  # Ejecutar el juego x veces
     print("Episodio: ", episode+1)
     run_game()
     score = 0
@@ -177,13 +181,14 @@ for _ in range(5):  # Ejecutar el juego 100 veces
 print("Acciones totales: ", sum(actions_per_food))
 min = min(max_score)
 max = max(max_score)
-mean_score = sum(max_score) / len(max_score)
 print("Puntajes:", max_score)
-print("Puntaje total: ", sum(max_score))
+print("Suma pts totales: ", sum(max_score))
+mean_score = (sum(max_score)/len(max_score))
 print("Media: ", mean_score)
 print("Menor: ", min)
 print("Mayor: ", max)
 plt.plot(range(1, len(max_score) + 1), max_score)
+plt.plot(mean_score)
 plt.xlabel("Juego")
 plt.ylabel("Puntaje")
 plt.title("Puntajes obtenidos en cada juego")
